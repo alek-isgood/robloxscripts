@@ -1,0 +1,74 @@
+--// Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+--// Load Rayfield UI
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+--// Create Window
+local Window = Rayfield:CreateWindow({
+    Name = "Education UI",
+    LoadingTitle = "Rayfield Example",
+    LoadingSubtitle = "Highlight Demo",
+    ConfigurationSaving = {
+        Enabled = false
+    }
+})
+
+--// Create Tab
+local Tab = Window:CreateTab("Visuals", 4483362458)
+
+--// Highlight storage
+local Highlights = {}
+
+--// Function to add highlight
+local function addHighlight(player)
+    if player == LocalPlayer then return end
+    if not player.Character then return end
+    if Highlights[player] then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = player.Character
+    highlight.Parent = player.Character
+
+    Highlights[player] = highlight
+end
+
+--// Function to remove highlight
+local function removeHighlights()
+    for _, highlight in pairs(Highlights) do
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+    Highlights = {}
+end
+
+--// Toggle
+Tab:CreateToggle({
+    Name = "Highlight Players",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            -- Add highlights
+            for _, player in pairs(Players:GetPlayers()) do
+                addHighlight(player)
+            end
+
+            -- Highlight new players
+            Players.PlayerAdded:Connect(function(player)
+                player.CharacterAdded:Connect(function()
+                    task.wait(1)
+                    addHighlight(player)
+                end)
+            end)
+        else
+            -- Remove highlights
+            removeHighlights()
+        end
+    end
+})
