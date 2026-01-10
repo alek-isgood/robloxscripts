@@ -1,0 +1,751 @@
+-- SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- RAYFIELD
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+	Name = "🔥🔥🔥 Rezix Hub Universal Aimbot [FREE] 🔥🔥🔥",
+	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+	LoadingTitle = "Loading...",
+	LoadingSubtitle = "by Rezix",
+	ShowText = "Rayfield", -- for mobile users to unhide rayfield, change if you'd like
+	Theme = {
+		TextColor = Color3.fromRGB(240, 240, 240),
+
+		Background = Color3.fromRGB(25, 25, 25),
+		Topbar = Color3.fromRGB(125, 90, 0),
+		Shadow = Color3.fromRGB(125, 90, 0),
+
+		NotificationBackground = Color3.fromRGB(125, 90, 0),
+		NotificationActionsBackground = Color3.fromRGB(230, 230, 230),
+
+		TabBackground = Color3.fromRGB(80, 80, 80),
+		TabStroke = Color3.fromRGB(125, 90, 0),
+		TabBackgroundSelected = Color3.fromRGB(210, 210, 210),
+		TabTextColor = Color3.fromRGB(240, 240, 240),
+		SelectedTabTextColor = Color3.fromRGB(50, 50, 50),
+
+		ElementBackground = Color3.fromRGB(35, 35, 35),
+		ElementBackgroundHover = Color3.fromRGB(125, 90, 0),
+		SecondaryElementBackground = Color3.fromRGB(25, 25, 25),
+		ElementStroke = Color3.fromRGB(125, 90, 0),
+		SecondaryElementStroke = Color3.fromRGB(125, 90, 0),
+
+		SliderBackground = Color3.fromRGB(125, 90, 0),
+		SliderProgress = Color3.fromRGB(125, 90, 0),
+		SliderStroke = Color3.fromRGB(125, 90, 0),
+
+		ToggleBackground = Color3.fromRGB(30, 30, 30),
+		ToggleEnabled = Color3.fromRGB(125, 90, 0),
+		ToggleDisabled = Color3.fromRGB(100, 100, 100),
+		ToggleEnabledStroke = Color3.fromRGB(125, 90, 0),
+		ToggleDisabledStroke = Color3.fromRGB(125, 125, 125),
+		ToggleEnabledOuterStroke = Color3.fromRGB(100, 100, 100),
+		ToggleDisabledOuterStroke = Color3.fromRGB(65, 65, 65),
+
+		DropdownSelected = Color3.fromRGB(125, 90, 0),
+		DropdownUnselected = Color3.fromRGB(30, 30, 30),
+
+		InputBackground = Color3.fromRGB(30, 30, 30),
+		InputStroke = Color3.fromRGB(125, 90, 0),
+		PlaceholderColor = Color3.fromRGB(178, 178, 178)
+	}, -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+	ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+	DisableRayfieldPrompts = false,
+	DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = nil, -- Create a custom folder for your hub/game
+		FileName = "Rezix Hub"
+	},
+
+	Discord = {
+		Enabled = true, -- Prompt the user to join your Discord server if their executor supports it
+		Invite = "fZ6pbtZJst", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+		RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+	},
+	KeySystem = true, -- Set this to true to use our key system
+	KeySettings = {
+		Title = "Get Key From Discord",
+		Subtitle = "Key System",
+		Note = "Join Discord To Get Key dc.gg/rezixhub", -- Use this to tell the user how to get a key
+		FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+		GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+		Key = "https://pastebin.com/raw/1XHnWdLp"
+
+	}
+})
+
+local AimbotTab = Window:CreateTab("Aimbot", 4483362458)
+local FovTab = Window:CreateTab("FOV", 4483362458)
+local ESPTab = Window:CreateTab("ESP", 4483362458)
+local MiscTab = Window:CreateTab("Misc", 4483362458)
+
+-- SETTINGS
+local Settings = {
+
+	AimbotActive = false,
+
+	AimbotEnabled = false,
+	AimbotKey = Enum.UserInputType.MouseButton2,
+
+	FOV = 150,
+	FOVColor = Color3.fromRGB(255,0,0),
+	FOVRainbow = false,
+
+	SquareESPColor = Color3.fromRGB(255, 255, 255),
+	SquareESPRainbow = false,
+
+	ESPColor = Color3.fromRGB(255,170,60),
+	ESPRainbow = false,
+	ESPOutlineColor = Color3.fromRGB(255, 255, 255),
+	ESPFillTransparency = 0.5,
+	ESPOutlineTransparency = 1,
+	ESPOutlineRainbow = false,
+
+	SmoothingFactor = 1,
+	HealthBarBG = Color3.fromRGB(40,40,40),
+
+	TeamCheck = false,
+
+	MaxLockDistance = 1000,
+
+	Spinbot = false,
+
+	AimAt = "Head",
+
+	Spinning = false,
+
+	WallCheck = false
+
+}
+
+
+
+local chars = {tracked = {}}
+local trackingchars = {tracking = {}}
+
+local UI = {
+
+
+}
+
+-- UI CONTROLS
+AimbotTab:CreateToggle({
+	Name = "Aimbot (Hold RMB)",
+	CurrentValue = false,
+	Callback = function(v)
+		Settings.AimbotEnabled = v
+	end
+})
+
+local Toggle = MiscTab:CreateToggle({
+	Name = "Spinbot",
+	CurrentValue = false,
+
+	Callback = function(v)
+		Settings.Spinbot = v
+	end,
+})
+
+local Toggle = MiscTab:CreateToggle({
+	Name = "Wall Check",
+	CurrentValue = false,
+
+	Callback = function(v)
+		Settings.WallCheck = v
+	end,
+})
+
+FovTab:CreateSlider({
+	Name = "FOV Size",
+	Range = {50, 500},
+	Increment = 5,
+	CurrentValue = Settings.FOV,
+	Callback = function(v)
+		Settings.FOV = v
+	end
+})
+
+FovTab:CreateColorPicker({
+	Name = "FOV Color",
+	Color = Settings.FOVColor,
+	Callback = function(v)
+		Settings.FOVColor = v
+	end
+})
+
+FovTab:CreateToggle({
+	Name = "Rainbow FOV",
+	CurrentValue = false,
+	Callback = function(v) 
+		Settings.FOVRainbow = v
+	end
+})
+
+AimbotTab:CreateSlider({
+	Name = "Aimbot Smoothness",
+	Range = {0, 10},
+	Increment = 1,
+	CurrentValue = Settings.SmoothingFactor,
+	Callback = function(v)
+		Settings.SmoothingFactor = v
+	end
+})
+
+AimbotTab:CreateSlider({
+	Name = "Max Lock Distance",
+	Range = {1, 10000},
+	Increment = 50,
+	CurrentValue = Settings.MaxLockDistance,
+	Callback = function(v)
+		Settings.MaxLockDistance = v
+	end
+})
+
+
+ESPTab:CreateColorPicker({
+	Name = "Square ESP Color",
+	Color = Settings.SquareESPColor,
+	Callback = function(v)
+		Settings.SquareESPColor = v
+	end
+})
+
+ESPTab:CreateSlider({
+	Name = "ESP Fill Transparency",
+	Range = {0, 1},
+	Increment = .01,
+	CurrentValue = Settings.ESPFillTransparency,
+	Callback = function(v)
+		Settings.ESPFillTransparency = v
+	end
+})
+
+ESPTab:CreateSlider({
+	Name = "ESP Outline Transparency",
+	Range = {0, 1},
+	Increment = .01,
+	CurrentValue = Settings.ESPOutlineTransparency,
+	Callback = function(v)
+		Settings.ESPOutlineTransparency = v
+	end
+})
+
+ESPTab:CreateToggle({
+	Name = "Rainbow Square ESP",
+	CurrentValue = false,
+	Callback = function(v) 
+		Settings.SquareESPRainbow = v
+	end
+})
+
+ESPTab:CreateColorPicker({
+	Name = "ESP Outline Color",
+	Color = Settings.ESPOutlineColor,
+	Callback = function(v)
+		Settings.ESPOutlineColor = v
+	end
+})
+
+ESPTab:CreateToggle({
+	Name = "Rainbow ESP Outline",
+	CurrentValue = false,
+	Callback = function(v)
+		Settings.ESPOutlineRainbow = v
+	end
+})
+
+
+ESPTab:CreateColorPicker({
+	Name = "ESP Color",
+	Color = Settings.ESPColor,
+	Callback = function(v)
+		Settings.ESPColor = v
+	end
+})
+
+ESPTab:CreateToggle({
+	Name = "Rainbow ESP",
+	CurrentValue = false,
+	Callback = function(v)
+		Settings.ESPRainbow = v
+	end
+})
+
+MiscTab:CreateToggle({
+	Name = "Team Check",
+	CurrentValue = false,
+	Callback = function(v)
+		Settings.TeamCheck = v
+	end
+})
+
+local Dropdown = AimbotTab:CreateDropdown({
+	Name = "Aim At",
+	Options = {"HumanoidRootPart","Head"},
+	CurrentOption = {"Head"},
+	MultipleOptions = false,
+	Callback = function(v)
+		Settings.AimAt = table.unpack(v)
+	end,
+})
+
+
+
+-- FOV CIRCLE
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Filled = false
+FOVCircle.Thickness = 2
+FOVCircle.Visible = true
+
+local function ChangeESPColors(rainbow, char)
+
+
+
+
+	if chars.tracked[char] and Players:GetPlayerFromCharacter(char) ~= LocalPlayer then
+
+		if not chars.tracked[char]["HighLight"] or not chars.tracked[char]["ESPSquareStroke"] then return end
+
+		local highlight  = chars.tracked[char]["HighLight"]
+		local espsquare  = chars.tracked[char].ESPSquareStroke
+
+		if Settings.ESPRainbow then
+			highlight.FillColor = rainbow
+		else
+			highlight.FillColor = Settings.ESPColor
+		end
+
+		if Settings.SquareESPRainbow then
+			espsquare.Color = rainbow
+		else
+			espsquare.Color = Settings.SquareESPColor
+		end
+
+		if Settings.ESPOutlineRainbow then
+			highlight.OutlineColor = rainbow
+		else
+			highlight.OutlineColor = Settings.ESPOutlineColor
+		end
+
+		highlight.FillTransparency = Settings.ESPFillTransparency
+		highlight.OutlineTransparency = Settings.ESPOutlineTransparency
+
+
+
+
+	end
+
+
+
+
+
+end
+
+local function RemoveESP(char)
+
+
+	if chars.tracked[char]  then
+
+		chars.tracked[char].ESPFolder:Destroy()
+
+		chars.tracked[char] = nil
+
+	end
+
+end
+
+local function GiveESP(rainbow, char)
+
+
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if not hum then return end
+	if not hum.Health then return end
+	if not char then return end
+	if not char:FindFirstChild("HumanoidRootPart") then task.wait(math.pi) 
+
+	end
+
+	if not chars.tracked[char] and hum.Health > 0 and Players:GetPlayerFromCharacter(char) ~= LocalPlayer then
+
+
+
+		local folder = Instance.new("Folder")
+		folder.Name = "ESPFolder"
+		folder.Parent = char
+
+		local highlight = Instance.new("Highlight")
+		highlight.Adornee = char
+		highlight.Parent = folder
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+		local BillboardGui = Instance.new("BillboardGui")
+		BillboardGui.Adornee = char:FindFirstChild("HumanoidRootPart")
+		BillboardGui.Size = UDim2.new(10,0,10,0)
+		BillboardGui.AlwaysOnTop = true
+		BillboardGui.Parent = folder
+
+
+
+		local SquareESP = Instance.new("Frame")
+		SquareESP.Parent = BillboardGui
+		SquareESP.Size = UDim2.new(.5,0,.55,0)
+		SquareESP.Position = UDim2.new(.25,0,.245,0)
+		SquareESP.BackgroundTransparency = 1
+
+		local SquareESPStroke = Instance.new("UIStroke")
+		SquareESPStroke.Parent = SquareESP
+		SquareESPStroke.Thickness = 1
+		SquareESPStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+		local Healthbar = Instance.new("Frame")
+		Healthbar.Rotation = -180
+		Healthbar.Parent = BillboardGui
+		Healthbar.Size = UDim2.new(.025,0,.55,0)
+		Healthbar.Position = UDim2.new(.215,0,.245,0)
+		Healthbar.BackgroundColor3 = Color3.fromRGB(85, 0, 0)
+
+		local health = Instance.new("TextLabel")
+		health.Text = ""
+		health.Parent = Healthbar
+
+		health.Size = UDim2.new(1,0,1,0)
+		health.BackgroundColor3 = Color3.fromRGB(42, 156, 0)
+		health.ZIndex = 2
+
+
+
+		local NameTag = Instance.new("TextLabel")
+		NameTag.Parent = BillboardGui
+		NameTag.Size = UDim2.new(0.6, 0,0.055, 0)
+		NameTag.BackgroundTransparency = 1
+		NameTag.Text = char.Name
+		NameTag.Font = Enum.Font.Arimo
+		NameTag.Position = UDim2.new(0.2,0,0.185,0)
+		NameTag.TextScaled = true
+		NameTag.TextColor3 = Color3.fromRGB(255,255,255)
+
+		chars.tracked[char] = {
+
+			["HighLight"] = highlight,
+			["NameTag"] = NameTag,
+			["Health"] = health,
+			["healthbar"] = Healthbar,
+			["ESPFolder"] = folder,
+			["SquareESP"] = SquareESP,
+			["ESPSquareStroke"] = SquareESPStroke,
+			["Billboardgui"] = BillboardGui,
+
+		}
+
+
+
+
+	end
+
+
+
+
+end
+
+local function WallCheck(from, to, targetCharacter)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = {
+		LocalPlayer.Character,
+		targetCharacter
+
+	}
+	params.IgnoreWater = true
+
+	local result = workspace:Raycast(from, to - from, params)
+	return result == nil
+end
+
+local function GetTarget()
+
+	local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+
+	local best, bestDist = nil, math.huge
+
+	local Lchar = LocalPlayer.Character
+
+	if not Lchar then return end
+
+	for _, p in pairs(Players:GetPlayers()) do
+
+		if p ~= LocalPlayer and p.Character then
+
+			local hum = p.Character:FindFirstChild("Humanoid")
+
+			if not hum then return end
+
+			local hrp = p.Character.HumanoidRootPart
+
+			if not hrp then return end
+
+
+
+			if Settings.WallCheck then
+
+
+
+				if hum.Health > 0 and WallCheck(Camera.CFrame.Position, hrp.Position, p.Character) then
+
+					local pos, onScreen = Camera:WorldToScreenPoint(hrp.Position)
+					if onScreen then
+						local dist = (Vector2.new(pos.X,pos.Y) - center).Magnitude
+
+						if dist < Settings.FOV and dist < bestDist and (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude <= Settings.MaxLockDistance then
+
+
+
+							bestDist = dist
+							best = p.Character
+
+							trackingchars.tracking = p.Character
+
+						end
+					end
+				end
+
+			elseif not Settings.WallCheck then
+
+				if hum.Health > 0 then
+
+					local pos, onScreen = Camera:WorldToScreenPoint(hrp.Position)
+					if onScreen then
+						local dist = (Vector2.new(pos.X,pos.Y) - center).Magnitude
+
+						if dist < Settings.FOV and dist < bestDist and (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude <= Settings.MaxLockDistance then
+
+
+
+							bestDist = dist
+							best = p.Character
+
+							trackingchars.tracking = p.Character
+
+
+						end
+					end
+				end
+			end
+
+
+		end
+
+	end
+
+	return best
+
+end
+
+local function AimAt()
+
+	local char = GetTarget()
+
+
+
+	if not char then return end
+	local thepart = char:FindFirstChild(Settings.AimAt)
+	if not thepart then return end
+
+	if trackingchars.tracking ~= char then
+
+		trackingchars.tracking = char
+
+	else
+
+
+	end
+
+
+	repeat
+
+		Camera.CFrame = Camera.CFrame:Lerp(
+			CFrame.new(Camera.CFrame.Position, thepart.Position),
+			1 / Settings.SmoothingFactor
+		)
+		task.wait(.1)
+
+	until trackingchars.tracking ~= char or Settings.AimbotEnabled == false or not char or not Settings.AimbotActive
+
+
+
+end
+
+local function ChangeHealthBar(char)
+
+	local data = chars.tracked[char]
+	if not data then return end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	local root = char:FindFirstChild("HumanoidRootPart")
+
+	if not hum or hum.Health <= 0 or not root then
+		RemoveESP(char)
+		return
+	end
+	print(hum.Health)
+
+
+	local hp = hum.Health
+	local max = hum.MaxHealth
+	local percent = hp / max
+
+	data.Health.Size = UDim2.new(1,0,percent,0)
+
+	print(percent)
+
+end
+
+local function SpinBot()
+
+	if Settings.Spinbot == false then return end
+
+	if Settings.Spinning == true then return end
+
+	local char = LocalPlayer.Character
+
+	if not char then return end
+
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+
+	if not hrp then return end
+
+	Settings.Spinning = true
+
+	local counter = 1
+
+	repeat
+
+		if counter >= 360 then
+			counter = 1
+		else
+			counter = counter - 1
+		end
+
+		hrp.CFrame = hrp.CFrame * CFrame.Angles(0,math.rad(counter),0)
+
+		task.wait(.1)
+
+	until Settings.Spinbot == false or LocalPlayer.Character.Humanoid.Health<=0
+
+	Settings.Spinning = false 
+
+
+end
+
+UserInputService.InputBegan:Connect(function(inp, proc)
+
+	if proc then return end
+
+
+	if inp.UserInputType == Enum.UserInputType.MouseButton2 then
+
+
+		if Settings.AimbotActive then
+
+
+
+		else
+
+			Settings.AimbotActive = true
+
+		end
+
+
+
+	end
+
+
+end)
+
+
+
+UserInputService.InputEnded:Connect(function(inp, proc)
+
+	if proc then return end
+
+
+	if inp.UserInputType == Enum.UserInputType.MouseButton2 then
+
+
+		if Settings.AimbotActive then
+
+			Settings.AimbotActive = false
+
+		else
+
+
+
+		end
+
+
+
+	end
+
+
+end)
+
+RunService.RenderStepped:Connect(function()
+
+	local hue = (tick() % 5) / 5
+	local rainbow = Color3.fromHSV(hue,1,1)
+
+	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+	FOVCircle.Radius = Settings.FOV
+	FOVCircle.Color = Settings.FOVRainbow and rainbow or Settings.FOVColor
+
+	if Settings.AimbotEnabled and UserInputService:IsMouseButtonPressed(Settings.AimbotKey) then
+		AimAt()
+	end
+
+	SpinBot()
+
+	for _, p in pairs(Players:GetPlayers()) do
+
+
+		if Settings.TeamCheck == true then
+
+			if p.Team ~= LocalPlayer.Team then
+				GiveESP(rainbow, p.Character)
+
+			else
+				RemoveESP(p.Character)
+			end
+
+		else
+			GiveESP(rainbow, p.Character)
+		end
+
+		ChangeESPColors(rainbow, p.Character)
+
+		p.CharacterRemoving:Connect(function(char)
+			RemoveESP(char)
+		end)
+
+	end
+
+end)
+
+while true do 
+
+	for char,_ in pairs(chars.tracked) do
+		ChangeHealthBar(char)
+	end  
+	task.wait(0.01)
+	
+end
